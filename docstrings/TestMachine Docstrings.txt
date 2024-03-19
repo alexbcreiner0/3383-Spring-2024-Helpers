@@ -1,0 +1,54 @@
+__init__
+The constructor for the TestMachine testing environment.
+
+Required Argument:
+	*algos: A list of functions, i.e. algorithms to be testing on
+Optional Arguments
+	generator = None: (function) An input generator meant for creating random inputs to the test functions
+	n_range = (10,700): (2-tuple) Input sizes to be tested on
+	steps = 1: (natural number) Increment size for moving through the range of input sizes
+	trials = 1: (natural number) How many random inputs will be generated for each size
+	mode = 'average': (other options are 'worst', 'best'): Controls the kind of testing being done
+	clean_outliers = True: (boolean) Cleans outliers
+###
+add_algos
+For adding new algorithms without having to repeatedly call appends directly on the attribute. Can take any number 
+of algorithms as argument.
+###
+set_generator
+Sets the random input generator for testing
+###
+test
+Generates a random input of size n using the generator, then runs all algorithms on that input, timing the runs and 
+returning the times in a list.
+
+Required Argument: 
+	n: (int) The input sizes being tested on.
+###
+multi-test
+Performs multiple tests on multiple inputs of the same size n, returning a list of lists, 
+each sublist containing runtimes for that particular algorithm.
+
+Required Argument: 
+	n: (int) The input sizes being tested on.
+Optional Argument:
+	trials = self.trials: (int) The number of trials per input size. Defaults to the class attribute.
+###
+test_run
+Performs a multi_test with the appropriate arguments passed down, then from those times returns either the average, 
+worst, or best times for each algorithm, depending on the testing machine's mode.  
+
+Required Argument: 
+	n: (int) The input sizes being tested on.
+Optional Arguments:
+	trials = self.trials: (int) The number of trials per input size. Defaults to the class attribute.
+	mode = self.mode: (other options are 'worst', 'best')
+###
+full_test
+Performs a test_run on all input sizes in a range given by the n_range, and with step sizes equal to steps. If 
+clean_outliers is enabled, it will append the previous number again instead if the number it's supposed to append 
+is more than 5 times the sum of all times appended up to that point. 
+###
+full_test_and_plot
+Performs a full test, then plots the results using matplotlib
+###

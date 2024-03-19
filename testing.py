@@ -25,7 +25,7 @@ try:
 				current_line += 1
 			docstrings[key] = value
 			current_line += 1
-except OSError:
+except OSError: 
 	print('Error opening docstrings')
 
 class TestMachine:
@@ -43,6 +43,9 @@ class TestMachine:
 		for algo in algos:
 			self.algos.append(algo)
 
+	def clear_algos(self):
+		self.algos = []
+
 	def set_generator(self, func):
 		self.generator = func
 
@@ -57,20 +60,35 @@ class TestMachine:
 		results = []
 		test_args = self.generate(n)
 		for algo in self.algos:
-			if isinstance(test_args, tuple):
-				test_args, test_kwargs = test_args[0], test_args[1]
-				test_args_copy = tuple(test_args)
-				test_kwargs_copy = tuple(test_kwargs)
-				start = time.perf_counter()
-				algo(*test_args_copy, **test_kwargs_copy)
-				stop = time.perf_counter()
-			elif isinstance(test_args, list):
+			if isinstance(test_args, tuple) and len(test_args) == 2:
+				if isinstance(test_args[1], dict):
+					test_args, test_kwargs = test_args[0], test_args[1]
+					test_args_copy = tuple(test_args)
+					test_kwargs_copy = tuple(test_kwargs)
+					start = time.perf_counter()
+					algo(*test_args_copy, **test_kwargs_copy)
+					stop = time.perf_counter()
+					results.append(stop-start)
+					continue
+			if isinstance(test_args, list):
+				print(f'IOts a fucking list')
 				test_args_copy = copy.copy(test_args)
 				start = time.perf_counter()
 				algo(test_args_copy)
 				stop = time.perf_counter()
-			else:
+				results.append(stop-start)
+				continue
+			if isinstance(test_args, tuple):
 				test_args_copy = copy.copy(test_args)
+				start = time.perf_counter()
+				algo(*test_args_copy)
+				stop = time.perf_counter()
+				results.append(stop-start)
+				continue
+			test_args_copy = copy.copy(test_args)
+			start = time.perf_counter()
+			algo(*test_args_copy)
+			stop = time.perf_counter()
 			results.append(stop-start)
 		return results
 
@@ -81,9 +99,21 @@ class TestMachine:
 			results.append([])
 		for i in range(trials):
 			trial_times = self.test(n)
+			print(f'trial_times: {trial_times}')
 			for i,algo in enumerate(self.algos):
 				results[i].append(trial_times[i])
 		return results
+
+	def __str__(self):
+		s = f'I am a testing machine with the following attributes: \n'
+		s += f'Algorithms to test: {self.algos}\n'
+		s += f'Generator to use: {self.generator}\n'
+		s += f'n ranges from {self.n_range[0]} to {self.n_range[1]}\n'
+		s += f'Step size is {self.steps}\n'
+		s += f'Number of tests per sample size is {self.trials}\n'
+		s += f'In {self.mode} mode\n'
+		s += f'Deleting outliers: {self.clean_outliers}'
+		return s
 
 	def test_run(self, n, trials = None, mode = None):
 		if trials == None: trials = self.trials
@@ -159,6 +189,9 @@ os.chdir(current_directory)
 
 if __name__ == '__main__':
 	from testing_utilities import *
+	from karatsuba import *
+	from generators  import *
 	from sorting_algos import *
-	T = TestMachine(bubblesort, selectionsort, generator = random_list)
+	T = TestMachine(heapsort, quicksort, generator = list_exponential)
+	T.n_range = (10,300)
 	T.full_test_and_plot()
